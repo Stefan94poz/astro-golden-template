@@ -1,0 +1,132 @@
+---
+// AI:PAGE:BLOG_LIST — Blog list template for transformerWorker injection
+// SANITY: Content migrated via Sanity CMS
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Placeholder blog posts — real content comes from Sanity CMS
+const placeholderPosts = [
+  {
+    slug: 'sample-post-1',
+    title: 'How We Built Our Product',
+    date: '2024-01-15',
+    excerpt: 'A look behind the scenes at our development process and the decisions that shaped our product.',
+    category: 'Product',
+  },
+  {
+    slug: 'sample-post-2',
+    title: 'Customer Success Story',
+    date: '2024-01-08',
+    excerpt: 'How one of our customers achieved remarkable results using our platform in just 30 days.',
+    category: 'Case Study',
+  },
+  {
+    slug: 'sample-post-3',
+    title: 'Industry Insights for 2024',
+    date: '2024-01-02',
+    excerpt: 'Our analysis of the key trends shaping the industry this year and what they mean for you.',
+    category: 'Insights',
+  },
+];
+---
+
+<BaseLayout
+  title="Blog"
+  description="Read our latest articles, insights, and updates."
+>
+  <!-- AI:INJECT:NAVBAR -->
+  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="/" class="font-bold text-xl text-primary" aria-label="Home">Logo</a>
+      <div class="hidden md:flex items-center gap-8">
+        <!-- AI:INJECT:NAV_LINKS -->
+      </div>
+    </div>
+  </nav>
+
+  <div class="h-16"></div>
+
+  <!-- Blog header -->
+  <section class="py-20 px-4 text-center">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-4xl md:text-6xl font-bold text-text text-balance">
+        <!-- AI:INJECT:BLOG_TITLE -->
+        Blog
+      </h1>
+      <p class="mt-4 text-xl text-text-muted text-pretty">
+        <!-- AI:INJECT:BLOG_SUBTITLE -->
+        Insights, updates, and articles from our team.
+      </p>
+    </div>
+  </section>
+
+  <!-- Blog posts grid -->
+  <section class="pb-24 px-4">
+    <div class="max-w-7xl mx-auto">
+      <!-- SANITY: Replace this placeholder grid with Sanity content query -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {placeholderPosts.map((post) => (
+          <article class="group flex flex-col bg-surface rounded-xl overflow-hidden border border-surface hover:border-primary/30 transition-colors duration-200">
+            <!-- Thumbnail placeholder -->
+            <div class="aspect-[16/9] bg-primary/5 flex items-center justify-center">
+              <span class="text-text-muted text-sm" aria-hidden="true">Image</span>
+            </div>
+            <div class="flex flex-col flex-1 p-6">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                  {post.category}
+                </span>
+                <time class="text-xs text-text-muted tabular-nums" datetime={post.date}>
+                  {new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </time>
+              </div>
+              <h2 class="text-xl font-semibold text-text text-balance mb-2 group-hover:text-primary transition-colors">
+                {post.title}
+              </h2>
+              <p class="text-text-muted text-sm leading-relaxed flex-1 text-pretty">
+                {post.excerpt}
+              </p>
+              <a
+                href={`/blog/${post.slug}`}
+                class="mt-4 inline-flex items-center text-primary text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:ring-primary rounded"
+                aria-label={`Read more about ${post.title}`}
+              >
+                Read more
+                <svg class="ml-1 w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Pagination — SANITY: Connect to real page count -->
+      <nav class="mt-16 flex justify-center items-center gap-2" aria-label="Blog pagination">
+        <button
+          disabled
+          class="px-4 py-2 text-sm rounded-lg border border-surface text-text-muted cursor-not-allowed"
+          aria-label="Previous page"
+        >
+          Previous
+        </button>
+        <span class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg" aria-current="page">
+          1
+        </span>
+        <button
+          class="px-4 py-2 text-sm rounded-lg border border-surface text-text hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Next page"
+        >
+          Next
+        </button>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer slot="footer" class="py-12 px-4 border-t border-surface">
+    <div class="max-w-7xl mx-auto text-center text-text-muted text-sm">
+      <!-- AI:INJECT:FOOTER_CONTENT -->
+      © {new Date().getFullYear()} Company Name
+    </div>
+  </footer>
+</BaseLayout>

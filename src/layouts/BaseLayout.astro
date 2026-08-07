@@ -1,0 +1,163 @@
+---
+// BaseLayout.astro — Optimized for transformerWorker AI injection
+// AI:LAYOUT:BASE — Do not remove this marker
+
+import { ClientRouter } from 'astro:transitions';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  lang?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
+  noIndex?: boolean;
+}
+
+const {
+  title = 'Website',
+  description = '',
+  lang = 'en',
+  ogImage = '/og-image.png',
+  canonicalUrl = Astro.url.toString(),
+  noIndex = false,
+} = Astro.props;
+
+const siteName = title;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- AI:INJECT:SEO_META — SEO meta tags injected here -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+    {!noIndex && <meta name="robots" content="index, follow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Performance hints -->
+    <!-- AI:INJECT:FONT_PRELOADS — Font preload links injected here -->
+
+    <!-- Astro View Transitions (ClientRouter) — enables page transitions between routes -->
+    <ClientRouter />
+
+    <!-- AI:INJECT:HEAD_EXTRA — Additional head content injected here -->
+  </head>
+  <body class="bg-background text-text antialiased">
+    <!-- AI:INJECT:NAVBAR — Navigation component injected here -->
+    <slot name="navbar" />
+
+    <!-- Main content -->
+    <main id="main-content">
+      <!-- AI:INJECT:CONTENT — Page content injected here -->
+      <slot />
+    </main>
+
+    <!-- AI:INJECT:FOOTER — Footer component injected here -->
+    <slot name="footer" />
+
+    <!-- AI:INJECT:SCRIPTS — Page scripts injected here -->
+  </body>
+</html>
+
+<style is:global>
+  /* Base reset and typography */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    color-scheme: light;
+  }
+
+  body {
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Skip link for accessibility */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-primary, #1a56db);
+    color: white;
+    padding: 8px;
+    z-index: 100;
+    text-decoration: none;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
+  /* Focus visible styles */
+  :focus-visible {
+    outline: 2px solid var(--color-primary, #1a56db);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* View transition animations */
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+  }
+
+  ::view-transition-old(root) {
+    animation: 200ms ease-in fade-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: 300ms ease-out fade-in;
+  }
+
+  /* Tabular numbers for statistics */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Touch interaction optimization */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>

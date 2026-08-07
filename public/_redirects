@@ -1,0 +1,3 @@
+# Cloudflare Pages redirect rules
+# Redirect trailing slashes to canonical paths (optional – remove if you prefer trailing slashes)
+/*/  /:splat  301
