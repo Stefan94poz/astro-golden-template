@@ -1,6 +1,10 @@
 ---
 // AI:PAGE:HOME — Home page template for transformerWorker injection
+// transformerWorker Step 4 writes src/data/home-data.ts; this page renders it.
+// The template structure (layout, classes, chrome) is NEVER modified by the
+// worker — only the data file is overwritten. This guarantees valid builds.
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { homeData } from '../data/home-data';
 ---
 
 <BaseLayout
@@ -8,21 +12,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   description="Welcome to our website"
 >
   <!-- AI:INJECT:NAVBAR -->
-  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-surface">
+  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border">
     <!-- AI:INJECT:NAV_CONTENT -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="/" class="font-bold text-xl text-primary" aria-label="Home">
         <!-- AI:INJECT:LOGO -->
-        Logo
+        {homeData.logo}
       </a>
       <div class="hidden md:flex items-center gap-8">
         <!-- AI:INJECT:NAV_LINKS -->
+        <div set:html={homeData.navLinks} />
       </div>
       <div class="flex items-center gap-4">
         <!-- AI:INJECT:NAV_CTA -->
-        <a href="#contact" class="px-4 py-2 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-          Get Started
-        </a>
+        <div set:html={homeData.navCta} />
       </div>
     </div>
   </nav>
@@ -33,47 +36,37 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <!-- AI:INJECT:HERO -->
   <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden py-20 px-4">
     <div class="max-w-5xl mx-auto text-center">
-      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-text text-balance">
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-foreground text-balance">
         <!-- AI:INJECT:HERO_HEADLINE -->
-        Your Headline Here
+        {homeData.heroHeadline}
       </h1>
-      <p class="mt-6 text-xl md:text-2xl text-text-muted max-w-3xl mx-auto text-pretty">
+      <p class="mt-6 text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-pretty">
         <!-- AI:INJECT:HERO_SUBHEADLINE -->
-        Your subheadline goes here.
+        {homeData.heroSubheadline}
       </p>
       <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
         <!-- AI:INJECT:HERO_CTAS -->
-        <a
-          href="#contact"
-          class="px-8 py-4 rounded-lg bg-primary text-white font-semibold text-lg hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          fetchpriority="high"
-        >
-          Get Started
-        </a>
-        <a
-          href="#features"
-          class="px-8 py-4 rounded-lg border border-surface bg-surface text-text font-semibold text-lg hover:bg-surface/80 transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        >
-          Learn More
-        </a>
+        <div set:html={homeData.heroCtas} />
       </div>
     </div>
   </section>
 
   <!-- AI:INJECT:FEATURES -->
-  <section id="features" class="py-24 px-4 bg-surface">
+  <section id="features" class="py-24 px-4 bg-card">
     <div class="max-w-7xl mx-auto">
       <div class="text-center mb-16">
-        <h2 class="text-3xl md:text-5xl font-bold text-text text-balance">
+        <h2 class="text-3xl md:text-5xl font-bold text-foreground text-balance">
           <!-- AI:INJECT:FEATURES_TITLE -->
-          Our Features
+          {homeData.featuresTitle}
         </h2>
-        <p class="mt-4 text-xl text-text-muted max-w-2xl mx-auto text-pretty">
+        <p class="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
           <!-- AI:INJECT:FEATURES_SUBTITLE -->
+          {homeData.featuresSubtitle}
         </p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <!-- AI:INJECT:FEATURE_CARDS -->
+        <div set:html={homeData.featureCards} />
       </div>
     </div>
   </section>
@@ -82,31 +75,34 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section id="about" class="py-24 px-4">
     <div class="max-w-4xl mx-auto">
       <!-- AI:INJECT:ABOUT_CONTENT -->
+      <div set:html={homeData.aboutContent} />
     </div>
   </section>
 
   <!-- AI:INJECT:CONTACT -->
-  <section id="contact" class="py-24 px-4 bg-surface">
+  <section id="contact" class="py-24 px-4 bg-card">
     <div class="max-w-2xl mx-auto text-center">
-      <h2 class="text-3xl md:text-4xl font-bold text-text text-balance mb-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance mb-4">
         <!-- AI:INJECT:CONTACT_TITLE -->
-        Get in Touch
+        {homeData.contactTitle}
       </h2>
       <!-- AI:INJECT:CONTACT_CONTENT -->
+      <div set:html={homeData.contactContent} />
     </div>
   </section>
 
   <!-- AI:INJECT:FOOTER -->
-  <footer slot="footer" class="py-12 px-4 border-t border-surface">
+  <footer slot="footer" class="py-12 px-4 border-t border-border">
     <div class="max-w-7xl mx-auto">
       <!-- AI:INJECT:FOOTER_CONTENT -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-        <p class="text-text-muted text-sm">
+        <p class="text-muted-foreground text-sm">
           <!-- AI:INJECT:COPYRIGHT -->
-          © {new Date().getFullYear()} Company Name
+          {homeData.copyright || `© ${new Date().getFullYear()} Company Name`}
         </p>
         <nav aria-label="Footer navigation" class="flex gap-6">
           <!-- AI:INJECT:FOOTER_LINKS -->
+          <div set:html={homeData.footerLinks} />
         </nav>
       </div>
     </div>

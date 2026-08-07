@@ -1,0 +1,17 @@
+---
+// AI:PAGE:ABOUT — About page using ContentPage layout + data injection.
+// transformerWorker Step 4 writes src/data/pages/about-data.ts; this page
+// imports it and passes sections to ContentPage. The template structure is
+// never modified by the worker — only the data file is overwritten.
+import ContentPage from '../layouts/ContentPage.astro';
+import type { PageSection } from '../layouts/ContentPage.astro';
+import { aboutData } from '../data/pages/about-data';
+
+const sections = aboutData as PageSection[];
+---
+
+<ContentPage
+  title="About Us"
+  description="Learn more about our company and mission."
+  sections={sections}
+/>

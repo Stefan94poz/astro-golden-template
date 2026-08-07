@@ -1,0 +1,218 @@
+---
+// ContentPage.astro — Generic content page layout for transformerWorker injection.
+// Non-home pages (about, services, legal, contact) use this layout.
+// The worker writes a data file (src/data/pages/<slug>-data.ts) with section
+// objects; the thin page file imports ContentPage + data and passes as props.
+import BaseLayout from './BaseLayout.astro';
+
+export interface SectionItem {
+  title?: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface PageSection {
+  type: 'navbar' | 'hero' | 'features' | 'text' | 'contact' | 'footer' | 'cta' | 'testimonials';
+  data: {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    body?: string;
+    headline?: string;
+    subheadline?: string;
+    ctas?: string[];
+    links?: string[];
+    logo?: string | null;
+    cta?: string | null;
+    items?: SectionItem[];
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    copyright?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+  sections: PageSection[];
+}
+
+const { title, description = '', lang = 'en', sections } = Astro.props;
+
+// Separate navbar/footer (named slots) from content sections (default slot).
+// Astro named slots must be direct children of the component, not inside .map().
+const navSection = sections.find((s) => s.type === 'navbar');
+const footerSection = sections.find((s) => s.type === 'footer');
+const contentSections = sections.filter((s) => s.type !== 'navbar' && s.type !== 'footer');
+---
+
+<BaseLayout title={title} description={description} lang={lang}>
+  {navSection && (
+    <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="/" class="font-bold text-xl text-primary" aria-label="Home">
+          {navSection.data.logo || title}
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          {(navSection.data.links || []).map((link) => <div set:html={link} />)}
+        </div>
+        {navSection.data.cta && <div class="flex items-center gap-4" set:html={navSection.data.cta} />}
+      </div>
+    </nav>
+  )}
+
+  {footerSection && (
+    <footer slot="footer" class="py-12 px-4 border-t border-border">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+          <p class="text-muted-foreground text-sm">
+            {footerSection.data.copyright || `© ${new Date().getFullYear()} ${title}`}
+          </p>
+          {footerSection.data.links?.length ? (
+            <nav aria-label="Footer navigation" class="flex gap-6">
+              {footerSection.data.links.map((link) => <div set:html={link} />)}
+            </nav>
+          ) : null}
+        </div>
+      </div>
+    </footer>
+  )}
+
+  <!-- Page spacer for fixed navbar -->
+  <div class="h-16"></div>
+
+  {contentSections.map((section) => {
+    if (section.type === 'hero') {
+      return (
+        <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden py-20 px-4">
+          <div class="max-w-5xl mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-foreground text-balance">
+              {section.data.headline || section.data.title}
+            </h1>
+            {(section.data.subheadline || section.data.subtitle) && (
+              <p class="mt-6 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty">
+                {section.data.subheadline || section.data.subtitle}
+              </p>
+            )}
+            {section.data.ctas?.length ? (
+              <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                {section.data.ctas.map((cta) => <div set:html={cta} />)}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      );
+    }
+    if (section.type === 'features') {
+      return (
+        <section class="py-20 px-4 bg-card">
+          <div class="max-w-7xl mx-auto">
+            {(section.data.title || section.data.subtitle) && (
+              <div class="text-center mb-12">
+                {section.data.title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance">{section.data.title}</h2>}
+                {section.data.subtitle && <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">{section.data.subtitle}</p>}
+              </div>
+            )}
+            {section.data.items?.length ? (
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {section.data.items.map((item) => (
+                  <article class="bg-background rounded-xl p-6 border border-border hover:border-primary/30 transition-colors">
+                    {item.icon && (
+                      <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
+                        <span class="text-primary text-xl" set:html={item.icon} />
+                      </div>
+                    )}
+                    {item.title && <h3 class="text-lg font-semibold text-foreground text-balance mb-2">{item.title}</h3>}
+                    {item.description && <p class="text-muted-foreground text-sm leading-relaxed text-pretty">{item.description}</p>}
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      );
+    }
+    if (section.type === 'text') {
+      return (
+        <section class="py-20 px-4">
+          <div class="max-w-4xl mx-auto">
+            {section.data.title && (
+              <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance mb-6">{section.data.title}</h2>
+            )}
+            {section.data.body ? (
+              <div class="prose prose-lg max-w-none text-muted-foreground" set:html={section.data.body} />
+            ) : section.data.description ? (
+              <p class="text-lg text-muted-foreground leading-relaxed text-pretty">{section.data.description}</p>
+            ) : null}
+          </div>
+        </section>
+      );
+    }
+    if (section.type === 'contact') {
+      return (
+        <section class="py-20 px-4 bg-card">
+          <div class="max-w-2xl mx-auto text-center">
+            {section.data.title && (
+              <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance mb-6">{section.data.title}</h2>
+            )}
+            {section.data.description && (
+              <p class="text-lg text-muted-foreground mb-8 text-pretty">{section.data.description}</p>
+            )}
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              {section.data.email && (
+                <a href={`mailto:${section.data.email}`} class="text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary rounded">{section.data.email}</a>
+              )}
+              {section.data.phone && (
+                <a href={`tel:${section.data.phone}`} class="text-primary hover:underline focus-visible:ring-2 focus-visible:ring-primary rounded">{section.data.phone}</a>
+              )}
+              {section.data.address && (
+                <address class="text-muted-foreground not-italic text-sm">{section.data.address}</address>
+              )}
+            </div>
+          </div>
+        </section>
+      );
+    }
+    if (section.type === 'cta') {
+      return (
+        <section class="py-20 px-4">
+          <div class="max-w-4xl mx-auto text-center bg-primary/5 rounded-2xl p-12 border border-primary/20">
+            {section.data.title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance mb-4">{section.data.title}</h2>}
+            {section.data.subtitle && <p class="text-lg text-muted-foreground mb-8 text-pretty">{section.data.subtitle}</p>}
+            {section.data.ctas?.length ? (
+              <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                {section.data.ctas.map((cta) => <div set:html={cta} />)}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      );
+    }
+    if (section.type === 'testimonials') {
+      return (
+        <section class="py-20 px-4 bg-card">
+          <div class="max-w-7xl mx-auto">
+            {section.data.title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance text-center mb-12">{section.data.title}</h2>}
+            {section.data.items?.length ? (
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {section.data.items.map((item) => (
+                  <blockquote class="bg-background rounded-xl p-6 border border-border">
+                    {item.description && <p class="text-muted-foreground leading-relaxed text-pretty mb-4">"{item.description}"</p>}
+                    {item.title && <footer class="text-sm font-medium text-foreground">— {item.title}</footer>}
+                  </blockquote>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </section>
+      );
+    }
+    // navbar and footer are handled above as named slots, not here.
+    return null;
+  })}
+</BaseLayout>
+
+

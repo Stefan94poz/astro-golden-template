@@ -1,26 +1,36 @@
 ---
 // AI:PAGE:BLOG_DETAIL — Blog detail template for transformerWorker injection
-// SANITY: Content migrated via Sanity CMS
+// transformerWorker Step 4 writes src/data/blog-data.ts; this page renders it.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { blogData } from '../../data/blog-data';
 
-// For static export, we need getStaticPaths
+// For static export, we need getStaticPaths.
 // SANITY: Replace this with actual Sanity content fetch
 export function getStaticPaths() {
-  return [
-    { params: { slug: 'sample-post-1' }, props: { title: 'How We Built Our Product', date: '2024-01-15', category: 'Product' } },
-    { params: { slug: 'sample-post-2' }, props: { title: 'Customer Success Story', date: '2024-01-08', category: 'Case Study' } },
-    { params: { slug: 'sample-post-3' }, props: { title: 'Industry Insights for 2024', date: '2024-01-02', category: 'Insights' } },
-  ];
+  return blogData.posts.map((post) => ({
+    params: { slug: post.slug },
+    props: {
+      title: post.title,
+      date: post.date,
+      category: post.category,
+      content: post.content || '',
+      author: post.author || 'Author Name',
+      authorRole: post.authorRole || 'Team Member',
+    },
+  }));
 }
 
 const { slug } = Astro.params;
-const { title, date, category } = Astro.props as { title: string; date: string; category: string };
+const { title, date, category, content, author, authorRole } = Astro.props as {
+  title: string; date: string; category: string; content: string;
+  author: string; authorRole: string;
+};
 
 // Related posts (placeholder — connect to Sanity)
-const relatedPosts = [
-  { slug: 'sample-post-2', title: 'Customer Success Story', date: '2024-01-08' },
-  { slug: 'sample-post-3', title: 'Industry Insights for 2024', date: '2024-01-02' },
-];
+const relatedPosts = blogData.posts
+  .filter((p) => p.slug !== slug)
+  .slice(0, 3)
+  .map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
 ---
 
 <BaseLayout
@@ -28,10 +38,10 @@ const relatedPosts = [
   description="Read this article on our blog."
 >
   <!-- Navbar -->
-  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-surface">
+  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="/" class="font-bold text-xl text-primary" aria-label="Home">Logo</a>
-      <a href="/blog" class="text-text-muted hover:text-primary transition-colors text-sm" aria-label="Back to Blog">
+      <a href="/blog" class="text-muted-foreground hover:text-primary transition-colors text-sm" aria-label="Back to Blog">
         ← Back to Blog
       </a>
     </div>
@@ -47,21 +57,21 @@ const relatedPosts = [
           <span class="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
             {category}
           </span>
-          <time class="text-sm text-text-muted tabular-nums" datetime={date}>
+          <time class="text-sm text-muted-foreground tabular-nums" datetime={date}>
             {new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </time>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-text text-balance leading-tight">
+        <h1 class="text-4xl md:text-5xl font-bold text-foreground text-balance leading-tight">
           {title}
         </h1>
         <!-- AI:INJECT:AUTHOR_META -->
         <div class="mt-6 flex items-center gap-4">
           <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0" aria-hidden="true">
-            <span class="text-primary text-sm font-bold">A</span>
+            <span class="text-primary text-sm font-bold">{author.charAt(0)}</span>
           </div>
           <div>
-            <p class="text-sm font-medium text-text">Author Name</p>
-            <p class="text-xs text-text-muted">Team Member</p>
+            <p class="text-sm font-medium text-foreground">{author}</p>
+            <p class="text-xs text-muted-foreground">{authorRole}</p>
           </div>
         </div>
       </header>
@@ -69,38 +79,30 @@ const relatedPosts = [
       <!-- Hero image -->
       <div class="aspect-[16/9] bg-primary/5 rounded-2xl overflow-hidden mb-12 flex items-center justify-center">
         <!-- SANITY: Replace with actual featured image -->
-        <span class="text-text-muted" aria-hidden="true">Featured Image</span>
+        <span class="text-muted-foreground" aria-hidden="true">Featured Image</span>
       </div>
 
       <!-- Article content -->
       <!-- SANITY: Replace with Portable Text renderer -->
       <div class="prose prose-lg max-w-none">
         <!-- AI:INJECT:ARTICLE_CONTENT -->
-        <p class="text-text-muted text-xl leading-relaxed">
-          This is a template article showing how your blog posts will look on the new website.
-          The actual content will be migrated via Sanity CMS.
-        </p>
-        <h2>What You'll Find Here</h2>
-        <p>
-          Your article content will flow naturally through this layout, with proper typography,
-          spacing, and visual hierarchy. Headings, paragraphs, images, and code blocks will all
-          be beautifully styled.
-        </p>
-        <p>
-          The design system applied to this site ensures consistent typography and color usage
-          throughout all your content.
-        </p>
+        {content ? <div set:html={content} /> : (
+          <p class="text-muted-foreground text-xl leading-relaxed">
+            This is a template article showing how your blog posts will look on the new website.
+            The actual content will be migrated via Sanity CMS.
+          </p>
+        )}
       </div>
 
       <!-- Social share -->
-      <div class="mt-12 pt-8 border-t border-surface flex items-center justify-between">
-        <p class="text-sm font-medium text-text">Share this article</p>
+      <div class="mt-12 pt-8 border-t border-border flex items-center justify-between">
+        <p class="text-sm font-medium text-foreground">Share this article</p>
         <div class="flex gap-3">
           <a
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.toString())}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="px-4 py-2 text-sm rounded-lg border border-surface hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            class="px-4 py-2 text-sm rounded-lg border border-border hover:bg-card transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Share on Twitter"
           >
             Twitter
@@ -109,7 +111,7 @@ const relatedPosts = [
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(Astro.url.toString())}`}
             target="_blank"
             rel="noopener noreferrer"
-            class="px-4 py-2 text-sm rounded-lg border border-surface hover:bg-surface transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+            class="px-4 py-2 text-sm rounded-lg border border-border hover:bg-card transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Share on LinkedIn"
           >
             LinkedIn
@@ -120,16 +122,16 @@ const relatedPosts = [
   </article>
 
   <!-- Related posts -->
-  <section class="py-16 px-4 bg-surface" aria-labelledby="related-heading">
+  <section class="py-16 px-4 bg-card" aria-labelledby="related-heading">
     <div class="max-w-7xl mx-auto">
-      <h2 id="related-heading" class="text-2xl font-bold text-text mb-8">Related Articles</h2>
+      <h2 id="related-heading" class="text-2xl font-bold text-foreground mb-8">Related Articles</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {relatedPosts.map((post) => (
-          <article class="bg-background rounded-xl p-6 border border-surface hover:border-primary/30 transition-colors">
-            <time class="text-xs text-text-muted tabular-nums" datetime={post.date}>
+          <article class="bg-background rounded-xl p-6 border border-border hover:border-primary/30 transition-colors">
+            <time class="text-xs text-muted-foreground tabular-nums" datetime={post.date}>
               {new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </time>
-            <h3 class="mt-2 text-lg font-semibold text-text text-balance">
+            <h3 class="mt-2 text-lg font-semibold text-foreground text-balance">
               <a
                 href={`/blog/${post.slug}`}
                 class="hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded"
@@ -144,8 +146,8 @@ const relatedPosts = [
   </section>
 
   <!-- Footer -->
-  <footer slot="footer" class="py-12 px-4 border-t border-surface">
-    <div class="max-w-7xl mx-auto text-center text-text-muted text-sm">
+  <footer slot="footer" class="py-12 px-4 border-t border-border">
+    <div class="max-w-7xl mx-auto text-center text-muted-foreground text-sm">
       <!-- AI:INJECT:FOOTER_CONTENT -->
       © {new Date().getFullYear()} Company Name
     </div>

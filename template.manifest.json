@@ -1,0 +1,103 @@
+{
+  "$schema": "./template.manifest.schema.json",
+  "version": "1.0.0",
+  "description": "Contract between astro-golden-template and transformerWorker. The worker reads this manifest to discover available pages, injection markers, Starwind config, and brand-override variables instead of hardcoding them.",
+  "astro": ">=7.1",
+  "tailwind": ">=4.0",
+  "pages": {
+    "home": {
+      "file": "src/pages/index.astro",
+      "marker": "AI:PAGE:HOME",
+      "slots": [
+        "AI:INJECT:NAVBAR",
+        "AI:INJECT:NAV_CONTENT",
+        "AI:INJECT:LOGO",
+        "AI:INJECT:NAV_LINKS",
+        "AI:INJECT:NAV_CTA",
+        "AI:INJECT:HERO",
+        "AI:INJECT:HERO_HEADLINE",
+        "AI:INJECT:HERO_SUBHEADLINE",
+        "AI:INJECT:HERO_CTAS",
+        "AI:INJECT:FEATURES",
+        "AI:INJECT:FEATURES_TITLE",
+        "AI:INJECT:FEATURES_SUBTITLE",
+        "AI:INJECT:FEATURE_CARDS",
+        "AI:INJECT:ABOUT",
+        "AI:INJECT:ABOUT_CONTENT",
+        "AI:INJECT:CONTACT",
+        "AI:INJECT:CONTACT_TITLE",
+        "AI:INJECT:CONTACT_CONTENT",
+        "AI:INJECT:FOOTER",
+        "AI:INJECT:FOOTER_CONTENT",
+        "AI:INJECT:COPYRIGHT",
+        "AI:INJECT:FOOTER_LINKS"
+      ]
+    },
+    "blogList": {
+      "file": "src/pages/blog/index.astro",
+      "marker": "AI:PAGE:BLOG_LIST",
+      "slots": [
+        "AI:INJECT:NAVBAR",
+        "AI:INJECT:NAV_LINKS",
+        "AI:INJECT:BLOG_TITLE",
+        "AI:INJECT:BLOG_SUBTITLE",
+        "AI:INJECT:FOOTER_CONTENT"
+      ]
+    },
+    "blogDetail": {
+      "file": "src/pages/blog/[slug].astro",
+      "marker": "AI:PAGE:BLOG_DETAIL",
+      "slots": [
+        "AI:INJECT:AUTHOR_META",
+        "AI:INJECT:ARTICLE_CONTENT",
+        "AI:INJECT:FOOTER_CONTENT"
+      ]
+    }
+  },
+  "layout": {
+    "file": "src/layouts/BaseLayout.astro",
+    "marker": "AI:LAYOUT:BASE",
+    "slots": [
+      "AI:INJECT:SEO_META",
+      "AI:INJECT:FONT_PRELOADS",
+      "AI:INJECT:HEAD_EXTRA",
+      "AI:INJECT:NAVBAR",
+      "AI:INJECT:CONTENT",
+      "AI:INJECT:FOOTER",
+      "AI:INJECT:SCRIPTS"
+    ]
+  },
+  "starwind": {
+    "registry": "src/components/starwind",
+    "alias": "@/components/starwind",
+    "importForm": "named",
+    "extension": false
+  },
+  "brandOverrides": {
+    "file": "src/styles/brand-overrides.css",
+    "importedAfter": "src/styles/starwind.css",
+    "variables": [
+      "--primary",
+      "--primary-foreground",
+      "--primary-accent",
+      "--secondary",
+      "--secondary-foreground",
+      "--secondary-accent",
+      "--accent",
+      "--accent-foreground",
+      "--background",
+      "--foreground",
+      "--card",
+      "--card-foreground",
+      "--popover",
+      "--popover-foreground",
+      "--muted",
+      "--muted-foreground",
+      "--border",
+      "--input",
+      "--font-sans",
+      "--font-heading"
+    ]
+  },
+  "fontVariables": ["--font-sans", "--font-heading"]
+}
