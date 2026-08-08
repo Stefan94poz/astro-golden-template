@@ -1,77 +1,47 @@
 {
   "$schema": "./template.manifest.schema.json",
-  "version": "1.0.0",
-  "description": "Contract between astro-golden-template and transformerWorker. The worker reads this manifest to discover available pages, injection markers, Starwind config, and brand-override variables instead of hardcoding them.",
+  "version": "2.0.0",
+  "description": "Contract between astro-golden-template and transformerWorker (v2 — block-based layout composition). The worker's Layout Planner emits an ordered BlockInstance[] plan; the Block Content Filler fills each block's typed props; PageAssembler.astro renders the plan. There is no fixed page skeleton — the worker never writes raw markup.",
   "astro": ">=7.1",
   "tailwind": ">=4.0",
+  "architecture": "block-composition",
+  "blocks": {
+    "registryFile": "src/lib/blocks.ts",
+    "componentDir": "src/components/blocks",
+    "assembler": "src/layouts/PageAssembler.astro",
+    "types": [
+      "navbar", "hero", "features", "gallery", "stats", "logo-cloud",
+      "testimonials", "news-list", "cta", "prose", "contact", "footer"
+    ]
+  },
   "pages": {
     "home": {
-      "file": "src/pages/index.astro",
-      "marker": "AI:PAGE:HOME",
-      "slots": [
-        "AI:INJECT:NAVBAR",
-        "AI:INJECT:NAV_CONTENT",
-        "AI:INJECT:LOGO",
-        "AI:INJECT:NAV_LINKS",
-        "AI:INJECT:NAV_CTA",
-        "AI:INJECT:HERO",
-        "AI:INJECT:HERO_HEADLINE",
-        "AI:INJECT:HERO_SUBHEADLINE",
-        "AI:INJECT:HERO_CTAS",
-        "AI:INJECT:FEATURES",
-        "AI:INJECT:FEATURES_TITLE",
-        "AI:INJECT:FEATURES_SUBTITLE",
-        "AI:INJECT:FEATURE_CARDS",
-        "AI:INJECT:ABOUT",
-        "AI:INJECT:ABOUT_CONTENT",
-        "AI:INJECT:CONTACT",
-        "AI:INJECT:CONTACT_TITLE",
-        "AI:INJECT:CONTACT_CONTENT",
-        "AI:INJECT:FOOTER",
-        "AI:INJECT:FOOTER_CONTENT",
-        "AI:INJECT:COPYRIGHT",
-        "AI:INJECT:FOOTER_LINKS"
-      ]
+      "astroFile": "src/pages/index.astro",
+      "dataFile": "src/data/pages/home.ts",
+      "dataExport": "homeBlocks"
+    },
+    "genericContent": {
+      "dataFileDir": "src/data/pages",
+      "dataExportSuffix": "Blocks",
+      "note": "Worker writes one <slug>.ts data file + one thin <slug>.astro wrapper per non-home page. Both files follow the same pattern as src/pages/index.astro."
     },
     "blogList": {
       "file": "src/pages/blog/index.astro",
       "marker": "AI:PAGE:BLOG_LIST",
-      "slots": [
-        "AI:INJECT:NAVBAR",
-        "AI:INJECT:NAV_LINKS",
-        "AI:INJECT:BLOG_TITLE",
-        "AI:INJECT:BLOG_SUBTITLE",
-        "AI:INJECT:FOOTER_CONTENT"
-      ]
+      "dataFile": "src/data/blog-data.ts"
     },
     "blogDetail": {
       "file": "src/pages/blog/[slug].astro",
       "marker": "AI:PAGE:BLOG_DETAIL",
-      "slots": [
-        "AI:INJECT:AUTHOR_META",
-        "AI:INJECT:ARTICLE_CONTENT",
-        "AI:INJECT:FOOTER_CONTENT"
-      ]
+      "dataFile": "src/data/blog-data.ts"
     }
   },
   "layout": {
     "file": "src/layouts/BaseLayout.astro",
     "marker": "AI:LAYOUT:BASE",
     "slots": [
-      "AI:INJECT:SEO_META",
-      "AI:INJECT:FONT_PRELOADS",
-      "AI:INJECT:HEAD_EXTRA",
-      "AI:INJECT:NAVBAR",
-      "AI:INJECT:CONTENT",
-      "AI:INJECT:FOOTER",
-      "AI:INJECT:SCRIPTS"
+      "AI:INJECT:FONT_PRELOADS"
     ]
-  },
-  "starwind": {
-    "registry": "src/components/starwind",
-    "alias": "@/components/starwind",
-    "importForm": "named",
-    "extension": false
   },
   "brandOverrides": {
     "file": "src/styles/brand-overrides.css",
@@ -99,5 +69,9 @@
       "--font-heading"
     ]
   },
-  "fontVariables": ["--font-sans", "--font-heading"]
+  "fontVariables": ["--font-sans", "--font-heading"],
+  "images": {
+    "publicDir": "public",
+    "note": "All downloaded assets live flat under /public. Blocks reference them via ImageRef.src (e.g. '/hero-photo.jpg'). ImageOrFallback.astro renders a graceful placeholder when src is absent — an image slot is never left blank."
+  }
 }

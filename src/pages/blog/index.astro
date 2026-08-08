@@ -1,52 +1,35 @@
 ---
-// AI:PAGE:BLOG_LIST — Blog list template for transformerWorker injection
-// transformerWorker Step 4 writes src/data/blog-data.ts; this page renders it.
+// AI:PAGE:BLOG_LIST — transformerWorker writes src/data/blog-data.ts; this
+// page renders it using the Navbar/Footer blocks + real post thumbnails
+// (ImageOrFallback — never the literal "Image" placeholder text).
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/blocks/Navbar.astro';
+import Footer from '../../components/blocks/Footer.astro';
+import ImageOrFallback from '../../components/blocks/ImageOrFallback.astro';
 import { blogData } from '../../data/blog-data';
 
 const posts = blogData.posts;
 ---
 
-<BaseLayout
-  title={blogData.title}
-  description={blogData.subtitle}
->
-  <!-- AI:INJECT:NAVBAR -->
-  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="/" class="font-bold text-xl text-primary" aria-label="Home">Logo</a>
-      <div class="hidden md:flex items-center gap-8">
-        <!-- AI:INJECT:NAV_LINKS -->
-      </div>
-    </div>
-  </nav>
+<BaseLayout title={blogData.title} description={blogData.subtitle}>
+  <Navbar slot="navbar" props={{ logo: 'Logo', links: blogData.navLinks }} />
 
   <div class="h-16"></div>
 
-  <!-- Blog header -->
   <section class="py-20 px-4 text-center">
     <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl md:text-6xl font-bold text-foreground text-balance">
-        <!-- AI:INJECT:BLOG_TITLE -->
-        {blogData.title}
-      </h1>
-      <p class="mt-4 text-xl text-muted-foreground text-pretty">
-        <!-- AI:INJECT:BLOG_SUBTITLE -->
-        {blogData.subtitle}
-      </p>
+      <h1 class="text-4xl md:text-6xl font-bold text-foreground text-balance">{blogData.title}</h1>
+      <p class="mt-4 text-xl text-muted-foreground text-pretty">{blogData.subtitle}</p>
     </div>
   </section>
 
-  <!-- Blog posts grid -->
   <section class="pb-24 px-4">
     <div class="max-w-7xl mx-auto">
-      <!-- SANITY: Replace this placeholder grid with Sanity content query -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts.map((post) => (
           <article class="group flex flex-col bg-card rounded-xl overflow-hidden border border-border hover:border-primary/30 transition-colors duration-200">
-            <!-- Thumbnail placeholder -->
-            <div class="aspect-[16/9] bg-primary/5 flex items-center justify-center">
-              <span class="text-muted-foreground text-sm" aria-hidden="true">Image</span>
+            <div class="aspect-[16/9]">
+              <ImageOrFallback image={post.image ? { ...post.image, alt: post.image.alt || post.title } : { alt: post.title }} />
             </div>
             <div class="flex flex-col flex-1 p-6">
               <div class="flex items-center gap-2 mb-3">
@@ -77,34 +60,8 @@ const posts = blogData.posts;
           </article>
         ))}
       </div>
-
-      <!-- Pagination — SANITY: Connect to real page count -->
-      <nav class="mt-16 flex justify-center items-center gap-2" aria-label="Blog pagination">
-        <button
-          disabled
-          class="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground cursor-not-allowed"
-          aria-label="Previous page"
-        >
-          Previous
-        </button>
-        <span class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg" aria-current="page">
-          1
-        </span>
-        <button
-          class="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-card transition-colors focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Next page"
-        >
-          Next
-        </button>
-      </nav>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer slot="footer" class="py-12 px-4 border-t border-border">
-    <div class="max-w-7xl mx-auto text-center text-muted-foreground text-sm">
-      <!-- AI:INJECT:FOOTER_CONTENT -->
-      © {new Date().getFullYear()} Company Name
-    </div>
-  </footer>
+  <Footer slot="footer" props={{ copyright: `© ${new Date().getFullYear()}`, links: [] }} />
 </BaseLayout>

@@ -1,0 +1,50 @@
+---
+// Gallery.astro — variant: grid | masonry | strip
+import type { GalleryProps } from '../../lib/blocks';
+import ImageOrFallback from './ImageOrFallback.astro';
+
+export interface Props {
+  variant?: string;
+  props: GalleryProps;
+}
+
+const { variant = 'grid', props } = Astro.props;
+const { title, subtitle, images = [] } = props;
+---
+
+<section class="py-20 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    {(title || subtitle) && (
+      <div class="max-w-2xl mb-12">
+        {title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance">{title}</h2>}
+        {subtitle && <p class="mt-4 text-lg text-muted-foreground text-pretty">{subtitle}</p>}
+      </div>
+    )}
+
+    {variant === 'masonry' ? (
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 [&>*:nth-child(3n+1)]:row-span-2">
+        {images.map((img, i) => (
+          <div class:list={['rounded-xl overflow-hidden border border-border', i % 3 === 0 ? 'aspect-[3/4]' : 'aspect-square']}>
+            <ImageOrFallback image={img} />
+          </div>
+        ))}
+      </div>
+    ) : variant === 'strip' ? (
+      <div class="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:thin]">
+        {images.map((img) => (
+          <div class="min-w-[280px] sm:min-w-[340px] aspect-[4/3] rounded-xl overflow-hidden border border-border snap-start">
+            <ImageOrFallback image={img} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {images.map((img) => (
+          <div class="aspect-square rounded-xl overflow-hidden border border-border">
+            <ImageOrFallback image={img} />
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

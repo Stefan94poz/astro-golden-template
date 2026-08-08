@@ -1,0 +1,27 @@
+---
+// LogoCloud.astro — variant: row
+import type { LogoCloudProps } from '../../lib/blocks';
+
+export interface Props {
+  variant?: string;
+  props: LogoCloudProps;
+}
+
+const { props } = Astro.props;
+const { title, logos = [] } = props;
+---
+
+<section class="py-14 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    {title && <p class="text-center text-sm font-medium text-muted-foreground mb-8">{title}</p>}
+    <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-80">
+      {logos.map((logo) => (
+        logo.src ? (
+          <img src={logo.src} alt={logo.alt} width={logo.width || 120} height={logo.height || 40} class="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all" loading="lazy" />
+        ) : (
+          <div class="h-8 w-28 rounded bg-muted" role="img" aria-label={logo.alt}></div>
+        )
+      ))}
+    </div>
+  </div>
+</section>

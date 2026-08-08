@@ -1,0 +1,24 @@
+---
+// Prose.astro — variant: standard
+// Renders plain paragraph strings as real <p> tags — never a raw HTML blob.
+import type { ProseProps } from '../../lib/blocks';
+
+export interface Props {
+  variant?: string;
+  props: ProseProps;
+}
+
+const { props } = Astro.props;
+const { title, paragraphs = [] } = props;
+---
+
+<section class="py-20 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-3xl mx-auto">
+    {title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance mb-6">{title}</h2>}
+    <div class="flex flex-col gap-4">
+      {paragraphs.map((p) => (
+        <p class="text-lg text-muted-foreground leading-relaxed text-pretty">{p}</p>
+      ))}
+    </div>
+  </div>
+</section>

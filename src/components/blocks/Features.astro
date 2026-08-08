@@ -1,0 +1,93 @@
+---
+// Features.astro — variant: grid-cards | bento | icon-row | zigzag
+import type { FeaturesProps } from '../../lib/blocks';
+import ImageOrFallback from './ImageOrFallback.astro';
+
+export interface Props {
+  variant?: string;
+  props: FeaturesProps;
+}
+
+const { variant = 'grid-cards', props } = Astro.props;
+const { eyebrow, title, subtitle, items = [] } = props;
+---
+
+<section class="py-20 md:py-24 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    {(title || subtitle) && (
+      <div class="max-w-2xl mb-14">
+        {eyebrow && <p class="text-sm font-semibold tracking-wide uppercase text-primary mb-3">{eyebrow}</p>}
+        {title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance">{title}</h2>}
+        {subtitle && <p class="mt-4 text-lg text-muted-foreground text-pretty">{subtitle}</p>}
+      </div>
+    )}
+
+    {variant === 'bento' ? (
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[minmax(220px,auto)]">
+        {items.map((item, i) => (
+          <article
+            class:list={[
+              'rounded-2xl p-6 border border-border bg-card hover:border-primary/40 transition-colors flex flex-col',
+              i === 0 ? 'md:col-span-2 md:row-span-2' : 'md:col-span-2',
+            ]}
+          >
+            {item.image?.src && (
+              <div class="rounded-lg overflow-hidden mb-4 aspect-[16/9]">
+                <ImageOrFallback image={item.image} />
+              </div>
+            )}
+            {item.icon && (
+              <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary" aria-hidden="true">
+                {item.icon.svg ? <span set:html={item.icon.svg} /> : <span>{item.icon.emoji}</span>}
+              </div>
+            )}
+            <h3 class="text-lg font-semibold text-foreground text-balance mb-2">{item.title}</h3>
+            {item.description && <p class="text-muted-foreground text-sm leading-relaxed text-pretty">{item.description}</p>}
+          </article>
+        ))}
+      </div>
+    ) : variant === 'icon-row' ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {items.map((item) => (
+          <div class="flex flex-col items-start">
+            {item.icon && (
+              <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 text-primary text-xl" aria-hidden="true">
+                {item.icon.svg ? <span set:html={item.icon.svg} /> : <span>{item.icon.emoji}</span>}
+              </div>
+            )}
+            <h3 class="text-base font-semibold text-foreground mb-1.5">{item.title}</h3>
+            {item.description && <p class="text-muted-foreground text-sm leading-relaxed text-pretty">{item.description}</p>}
+          </div>
+        ))}
+      </div>
+    ) : variant === 'zigzag' ? (
+      <div class="flex flex-col gap-16">
+        {items.map((item, i) => (
+          <div class:list={['grid grid-cols-1 md:grid-cols-2 gap-8 items-center', i % 2 === 1 && 'md:[&>*:first-child]:order-2']}>
+            <div class="rounded-2xl overflow-hidden aspect-[4/3] border border-border">
+              <ImageOrFallback image={item.image} />
+            </div>
+            <div>
+              <h3 class="text-2xl font-semibold text-foreground text-balance mb-3">{item.title}</h3>
+              {item.description && <p class="text-muted-foreground leading-relaxed text-pretty">{item.description}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        {items.map((item) => (
+          <article class="bg-card rounded-xl p-6 border border-border hover:border-primary/30 transition-colors flex flex-col h-full">
+            {item.icon && (
+              <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 text-primary text-xl" aria-hidden="true">
+                {item.icon.svg ? <span set:html={item.icon.svg} /> : <span>{item.icon.emoji}</span>}
+              </div>
+            )}
+            <h3 class="text-lg font-semibold text-foreground text-balance mb-2">{item.title}</h3>
+            {item.description && <p class="text-muted-foreground text-sm leading-relaxed text-pretty flex-1">{item.description}</p>}
+          </article>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

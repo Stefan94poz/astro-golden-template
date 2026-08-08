@@ -1,0 +1,85 @@
+---
+// PageAssembler.astro — renders an ordered BlockInstance[] plan.
+//
+// This REPLACES the old fixed index.astro/ContentPage.astro skeleton. There
+// is no hardcoded page structure anymore — every page (home, about, blog
+// index, anything) is just a plan of blocks read from a data file. The
+// worker's Layout Planner LLM call decides the plan; this component is the
+// only thing that turns that plan into real, safe HTML.
+//
+// navbar/footer are rendered into BaseLayout's named slots (so they stay
+// fixed/sticky); everything else renders in document order in the main slot.
+import BaseLayout from './BaseLayout.astro';
+import type { BlockInstance } from '../lib/blocks';
+
+import Navbar from '../components/blocks/Navbar.astro';
+import Hero from '../components/blocks/Hero.astro';
+import Features from '../components/blocks/Features.astro';
+import Gallery from '../components/blocks/Gallery.astro';
+import Stats from '../components/blocks/Stats.astro';
+import LogoCloud from '../components/blocks/LogoCloud.astro';
+import Testimonials from '../components/blocks/Testimonials.astro';
+import NewsList from '../components/blocks/NewsList.astro';
+import Cta from '../components/blocks/Cta.astro';
+import Prose from '../components/blocks/Prose.astro';
+import Contact from '../components/blocks/Contact.astro';
+import Footer from '../components/blocks/Footer.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+  ogImage?: string;
+  blocks: BlockInstance[];
+}
+
+const { title, description = '', lang = 'en', ogImage, blocks = [] } = Astro.props;
+
+const navBlock = blocks.find((b) => b.component === 'navbar');
+const footerBlock = blocks.find((b) => b.component === 'footer');
+const contentBlocks = blocks.filter((b) => b.component !== 'navbar' && b.component !== 'footer');
+---
+
+<BaseLayout title={title} description={description} lang={lang} ogImage={ogImage}>
+  {navBlock && (
+    <Fragment slot="navbar">
+      <Navbar props={navBlock.props as any} />
+    </Fragment>
+  )}
+
+  <!-- Page spacer for the fixed navbar -->
+  <div class="h-16"></div>
+
+  {contentBlocks.map((block) => {
+    switch (block.component) {
+      case 'hero':
+        return <Hero variant={block.variant} props={block.props as any} />;
+      case 'features':
+        return <Features variant={block.variant} props={block.props as any} />;
+      case 'gallery':
+        return <Gallery variant={block.variant} props={block.props as any} />;
+      case 'stats':
+        return <Stats variant={block.variant} props={block.props as any} />;
+      case 'logo-cloud':
+        return <LogoCloud variant={block.variant} props={block.props as any} />;
+      case 'testimonials':
+        return <Testimonials variant={block.variant} props={block.props as any} />;
+      case 'news-list':
+        return <NewsList variant={block.variant} props={block.props as any} />;
+      case 'cta':
+        return <Cta variant={block.variant} props={block.props as any} />;
+      case 'prose':
+        return <Prose variant={block.variant} props={block.props as any} />;
+      case 'contact':
+        return <Contact variant={block.variant} props={block.props as any} />;
+      default:
+        return null;
+    }
+  })}
+
+  {footerBlock && (
+    <Fragment slot="footer">
+      <Footer props={footerBlock.props as any} />
+    </Fragment>
+  )}
+</BaseLayout>

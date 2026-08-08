@@ -1,0 +1,28 @@
+---
+// Footer.astro — variant: standard
+import type { FooterProps } from '../../lib/blocks';
+
+export interface Props {
+  variant?: string;
+  props: FooterProps;
+}
+
+const { props } = Astro.props;
+const links = (props.links || []).filter((l) => l?.label && l?.href).slice(0, 16);
+const copyright = props.copyright || `© ${new Date().getFullYear()}`;
+---
+
+<footer class="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+    <p class="text-muted-foreground text-sm">{copyright}</p>
+    {links.length > 0 && (
+      <nav aria-label="Footer navigation" class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        {links.map((link) => (
+          <a href={link.href} class="text-sm text-muted-foreground hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    )}
+  </div>
+</footer>

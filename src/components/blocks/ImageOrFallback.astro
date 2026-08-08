@@ -1,0 +1,47 @@
+---
+// ImageOrFallback.astro — renders a real <img> when a src is provided,
+// otherwise a graceful gradient/pattern placeholder. This is what makes
+// "images are missing" structurally impossible: every block that wants an
+// image either shows the real downloaded asset or a deliberate, on-brand
+// placeholder — never a blank hole in the layout.
+import type { ImageRef } from '../../lib/blocks';
+
+export interface Props {
+  image?: ImageRef;
+  class?: string;
+  /** aspect-[...] tailwind class, e.g. "aspect-[4/3]" */
+  aspect?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+
+const {
+  image,
+  class: className = '',
+  aspect = 'aspect-[4/3]',
+  loading = 'lazy',
+  fetchpriority = 'auto',
+} = Astro.props;
+
+const hasImage = !!image?.src;
+---
+
+{hasImage ? (
+  <img
+    src={image!.src}
+    alt={image!.alt || ''}
+    width={image!.width || 1200}
+    height={image!.height || 900}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    class={`w-full h-full object-cover ${className}`}
+  />
+) : (
+  <div
+    class={`w-full h-full ${aspect} bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/10 relative overflow-hidden ${className}`}
+    role="img"
+    aria-label={image?.alt || 'Decorative visual'}
+  >
+    <div class="absolute inset-0 opacity-40" style="background-image: radial-gradient(circle at 20% 20%, currentColor 1px, transparent 1px); background-size: 22px 22px; color: var(--primary);"></div>
+  </div>
+)}

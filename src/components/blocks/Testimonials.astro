@@ -1,0 +1,52 @@
+---
+// Testimonials.astro — variant: grid | single-quote | carousel
+import type { TestimonialsProps } from '../../lib/blocks';
+
+export interface Props {
+  variant?: string;
+  props: TestimonialsProps;
+}
+
+const { variant = 'grid', props } = Astro.props;
+const { title, items = [] } = props;
+---
+
+<section class="py-20 px-4 sm:px-6 lg:px-8 bg-card">
+  <div class="max-w-7xl mx-auto">
+    {title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance text-center mb-14">{title}</h2>}
+
+    {variant === 'single-quote' && items[0] ? (
+      <figure class="max-w-3xl mx-auto text-center">
+        <blockquote class="text-2xl md:text-3xl font-medium text-foreground leading-relaxed text-balance">
+          "{items[0].quote}"
+        </blockquote>
+        <figcaption class="mt-6 text-sm text-muted-foreground">
+          <span class="font-semibold text-foreground">{items[0].author}</span>
+          {items[0].role && <span> — {items[0].role}</span>}
+        </figcaption>
+      </figure>
+    ) : variant === 'carousel' ? (
+      <div class="flex gap-6 overflow-x-auto pb-2 snap-x snap-mandatory [scrollbar-width:thin]">
+        {items.map((item) => (
+          <blockquote class="min-w-[300px] sm:min-w-[380px] snap-start bg-background rounded-xl p-6 border border-border flex flex-col">
+            <p class="text-muted-foreground leading-relaxed text-pretty mb-4 flex-1">"{item.quote}"</p>
+            <footer class="text-sm font-medium text-foreground">
+              {item.author}{item.role && <span class="text-muted-foreground font-normal"> — {item.role}</span>}
+            </footer>
+          </blockquote>
+        ))}
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {items.map((item) => (
+          <blockquote class="bg-background rounded-xl p-6 border border-border flex flex-col h-full">
+            <p class="text-muted-foreground leading-relaxed text-pretty mb-4 flex-1">"{item.quote}"</p>
+            <footer class="text-sm font-medium text-foreground">
+              {item.author}{item.role && <span class="text-muted-foreground font-normal"> — {item.role}</span>}
+            </footer>
+          </blockquote>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

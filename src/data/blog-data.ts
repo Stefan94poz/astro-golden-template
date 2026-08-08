@@ -1,8 +1,9 @@
 // blog-data.ts — Content data for blog list + detail pages.
 //
-// transformerWorker Step 4 OVERWRITES this file with resolved blog post
-// data from the scraped site. The placeholder values below ensure the
-// template builds standalone.
+// transformerWorker OVERWRITES this file with resolved blog post data from
+// the scraped site. The placeholder values below ensure the template builds
+// standalone.
+import type { ImageRef } from '../lib/blocks';
 
 export interface BlogPost {
   slug: string;
@@ -10,18 +11,21 @@ export interface BlogPost {
   date: string;
   excerpt: string;
   category: string;
-  content?: string;
+  content?: string[]; // paragraphs — rendered as real <p> tags, no raw HTML
   author?: string;
   authorRole?: string;
+  image?: ImageRef;
 }
 
 export const blogData: {
   title: string;
   subtitle: string;
+  navLinks: { label: string; href: string }[];
   posts: BlogPost[];
 } = {
   title: 'Blog',
   subtitle: 'Insights, updates, and articles from our team.',
+  navLinks: [],
   posts: [
     {
       slug: 'sample-post-1',

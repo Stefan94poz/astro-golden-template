@@ -1,0 +1,62 @@
+---
+// NewsList.astro — variant: list | grid
+// This is the block that fixes "missing sections" for content like Yale's
+// "Happening at SoA" bulletin board / news items that the old regex-based
+// extractor silently dropped.
+import type { NewsListProps } from '../../lib/blocks';
+import ImageOrFallback from './ImageOrFallback.astro';
+
+export interface Props {
+  variant?: string;
+  props: NewsListProps;
+}
+
+const { variant = 'list', props } = Astro.props;
+const { title, subtitle, items = [] } = props;
+---
+
+<section class="py-20 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    {(title || subtitle) && (
+      <div class="max-w-2xl mb-12">
+        {title && <h2 class="text-3xl md:text-4xl font-bold text-foreground text-balance">{title}</h2>}
+        {subtitle && <p class="mt-4 text-lg text-muted-foreground text-pretty">{subtitle}</p>}
+      </div>
+    )}
+
+    {variant === 'grid' ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map((item) => (
+          <article class="bg-card rounded-xl border border-border overflow-hidden flex flex-col h-full hover:border-primary/30 transition-colors">
+            <div class="aspect-[16/9]">
+              <ImageOrFallback image={item.image} />
+            </div>
+            <div class="p-5 flex flex-col flex-1">
+              {item.date && <time class="text-xs text-muted-foreground tabular-nums mb-2">{item.date}</time>}
+              <h3 class="text-base font-semibold text-foreground text-balance mb-2">
+                {item.href ? <a href={item.href} class="hover:text-primary focus-visible:ring-2 focus-visible:ring-primary rounded">{item.title}</a> : item.title}
+              </h3>
+              {item.excerpt && <p class="text-sm text-muted-foreground leading-relaxed text-pretty flex-1">{item.excerpt}</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div class="flex flex-col divide-y divide-border">
+        {items.map((item) => (
+          <article class="py-6 flex flex-col sm:flex-row gap-4 sm:items-start">
+            {item.date && (
+              <time class="shrink-0 text-xs font-medium text-muted-foreground tabular-nums sm:w-28 sm:pt-1">{item.date}</time>
+            )}
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-foreground text-balance mb-1.5">
+                {item.href ? <a href={item.href} class="hover:text-primary focus-visible:ring-2 focus-visible:ring-primary rounded">{item.title}</a> : item.title}
+              </h3>
+              {item.excerpt && <p class="text-sm text-muted-foreground leading-relaxed text-pretty">{item.excerpt}</p>}
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+  </div>
+</section>

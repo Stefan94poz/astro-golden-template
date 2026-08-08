@@ -1,0 +1,156 @@
+---
+// Navbar.astro — structurally overflow-safe navigation.
+//
+// Fixes the "no space for links" bug permanently: links beyond what fits
+// are never allowed to overflow the fixed-height bar. Desktop shows up to
+// MAX_VISIBLE links directly; anything beyond that collapses into a "More"
+// dropdown. Mobile always uses a full-height drawer listing every link.
+// This behavior is the SAME regardless of how many links the LLM passes in.
+import type { NavbarProps } from '../../lib/blocks';
+
+export interface Props {
+  props: NavbarProps;
+}
+
+const { props } = Astro.props;
+const logo = props.logo || 'Logo';
+const links = (props.links || []).filter((l) => l?.label && l?.href).slice(0, 12);
+const cta = props.cta;
+
+const MAX_VISIBLE = 5;
+const visibleLinks = links.slice(0, MAX_VISIBLE);
+const overflowLinks = links.slice(MAX_VISIBLE);
+---
+
+<nav
+  class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border"
+  data-navbar
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <a href="/" class="font-bold text-lg sm:text-xl text-primary shrink-0 truncate max-w-[40%]" aria-label="Home">
+      {logo}
+    </a>
+
+    <!-- Desktop links: capped count + overflow "More" menu, never wraps/overflows -->
+    <div class="hidden md:flex items-center gap-1 min-w-0">
+      {visibleLinks.map((link) => (
+        <a
+          href={link.href}
+          class="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-primary whitespace-nowrap"
+        >
+          {link.label}
+        </a>
+      ))}
+
+      {overflowLinks.length > 0 && (
+        <div class="relative" data-nav-more>
+          <button
+            type="button"
+            class="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-primary flex items-center gap-1"
+            aria-haspopup="true"
+            aria-expanded="false"
+            data-nav-more-trigger
+          >
+            More
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div
+            class="absolute right-0 mt-1 w-56 rounded-lg border border-border bg-card shadow-lg py-1 opacity-0 invisible translate-y-1 transition-all duration-150"
+            data-nav-more-panel
+          >
+            {overflowLinks.map((link) => (
+              <a href={link.href} class="block px-4 py-2 text-sm text-foreground/80 hover:bg-muted hover:text-primary">
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div class="flex items-center gap-3 shrink-0">
+      {cta && (
+        <a
+          href={cta.href}
+          class="hidden sm:inline-flex px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          {cta.label}
+        </a>
+      )}
+
+      <!-- Mobile trigger: always shows ALL links in a drawer, regardless of count -->
+      <button
+        type="button"
+        class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md text-foreground/80 hover:text-primary hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label="Open menu"
+        aria-expanded="false"
+        data-nav-mobile-trigger
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div
+    class="md:hidden hidden border-t border-border bg-background/98 backdrop-blur-sm max-h-[calc(100vh-4rem)] overflow-y-auto"
+    data-nav-mobile-panel
+  >
+    <div class="px-4 py-3 flex flex-col gap-1">
+      {links.map((link) => (
+        <a href={link.href} class="px-3 py-2.5 rounded-md text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary">
+          {link.label}
+        </a>
+      ))}
+      {cta && (
+        <a href={cta.href} class="mt-2 px-4 py-2.5 rounded-md bg-primary text-primary-foreground text-center font-medium">
+          {cta.label}
+        </a>
+      )}
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Vanilla, no framework — toggles for the overflow "More" menu and mobile drawer.
+  function initNavbar(nav: Element) {
+    const moreTrigger = nav.querySelector('[data-nav-more-trigger]');
+    const morePanel = nav.querySelector('[data-nav-more-panel]');
+    if (moreTrigger && morePanel) {
+      moreTrigger.addEventListener('click', () => {
+        const isOpen = morePanel.classList.contains('opacity-100');
+        morePanel.classList.toggle('opacity-0', isOpen);
+        morePanel.classList.toggle('invisible', isOpen);
+        morePanel.classList.toggle('translate-y-1', isOpen);
+        morePanel.classList.toggle('opacity-100', !isOpen);
+        morePanel.classList.toggle('translate-y-0', !isOpen);
+        moreTrigger.setAttribute('aria-expanded', String(!isOpen));
+      });
+      document.addEventListener('click', (e) => {
+        if (!nav.contains(e.target as Node)) {
+          morePanel.classList.add('opacity-0', 'invisible', 'translate-y-1');
+          morePanel.classList.remove('opacity-100', 'translate-y-0');
+        }
+      });
+    }
+
+    const mobileTrigger = nav.querySelector('[data-nav-mobile-trigger]');
+    const mobilePanel = nav.querySelector('[data-nav-mobile-panel]');
+    if (mobileTrigger && mobilePanel) {
+      mobileTrigger.addEventListener('click', () => {
+        const isHidden = mobilePanel.classList.contains('hidden');
+        mobilePanel.classList.toggle('hidden', !isHidden);
+        mobileTrigger.setAttribute('aria-expanded', String(isHidden));
+      });
+    }
+  }
+
+  document.querySelectorAll('[data-navbar]').forEach(initNavbar);
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('[data-navbar]').forEach(initNavbar);
+  });
+</script>

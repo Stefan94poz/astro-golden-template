@@ -1,0 +1,99 @@
+---
+// Hero.astro — 5 real layout variants (not just re-skinned centered text).
+// variant: centered | split-image-left | split-image-right | bg-image-overlay | minimal
+import type { HeroProps } from '../../lib/blocks';
+import ImageOrFallback from './ImageOrFallback.astro';
+
+export interface Props {
+  variant?: string;
+  props: HeroProps;
+}
+
+const { variant = 'centered', props } = Astro.props;
+const { eyebrow, headline, subheadline, ctas = [], image } = props;
+---
+
+{variant === 'split-image-left' || variant === 'split-image-right' ? (
+  <section class="relative overflow-hidden py-20 px-4 sm:px-6 lg:px-8">
+    <div class:list={[
+      'max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center',
+      variant === 'split-image-right' && 'lg:[&>*:first-child]:order-2',
+    ]}>
+      <div>
+        {eyebrow && <p class="text-sm font-semibold tracking-wide uppercase text-primary mb-3">{eyebrow}</p>}
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance">{headline}</h1>
+        {subheadline && <p class="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl text-pretty">{subheadline}</p>}
+        {ctas.length > 0 && (
+          <div class="mt-8 flex flex-wrap gap-4">
+            {ctas.map((cta) => (
+              <a
+                href={cta.href}
+                class:list={[
+                  'px-6 py-3 rounded-md text-sm font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  cta.variant === 'secondary' ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground',
+                ]}
+              >
+                {cta.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+      <div class="rounded-2xl overflow-hidden aspect-[4/3] border border-border">
+        <ImageOrFallback image={image} loading="eager" fetchpriority="high" />
+      </div>
+    </div>
+  </section>
+) : variant === 'bg-image-overlay' ? (
+  <section class="relative min-h-[80vh] flex items-center justify-center overflow-hidden py-20 px-4">
+    <div class="absolute inset-0 -z-10">
+      <ImageOrFallback image={image} loading="eager" fetchpriority="high" aspect="aspect-auto" class="h-full" />
+      <div class="absolute inset-0 bg-black/50"></div>
+    </div>
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+      {eyebrow && <p class="text-sm font-semibold tracking-wide uppercase text-white/80 mb-3">{eyebrow}</p>}
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-white text-balance">{headline}</h1>
+      {subheadline && <p class="mt-6 text-xl md:text-2xl text-white/85 max-w-2xl mx-auto text-pretty">{subheadline}</p>}
+      {ctas.length > 0 && (
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          {ctas.map((cta) => (
+            <a href={cta.href} class="px-6 py-3 rounded-md bg-white text-neutral-900 text-sm font-medium hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-white">
+              {cta.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+) : variant === 'minimal' ? (
+  <section class="py-16 px-4 sm:px-6 lg:px-8 border-b border-border">
+    <div class="max-w-4xl mx-auto">
+      {eyebrow && <p class="text-sm font-semibold tracking-wide uppercase text-primary mb-3">{eyebrow}</p>}
+      <h1 class="text-3xl md:text-5xl font-bold tracking-tight text-foreground text-balance">{headline}</h1>
+      {subheadline && <p class="mt-4 text-lg text-muted-foreground max-w-2xl text-pretty">{subheadline}</p>}
+    </div>
+  </section>
+) : (
+  <section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-20 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      {eyebrow && <p class="text-sm font-semibold tracking-wide uppercase text-primary mb-3">{eyebrow}</p>}
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-foreground text-balance">{headline}</h1>
+      {subheadline && <p class="mt-6 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto text-pretty">{subheadline}</p>}
+      {ctas.length > 0 && (
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          {ctas.map((cta) => (
+            <a
+              href={cta.href}
+              class:list={[
+                'px-6 py-3 rounded-md text-sm font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                cta.variant === 'secondary' ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground',
+              ]}
+            >
+              {cta.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+)}

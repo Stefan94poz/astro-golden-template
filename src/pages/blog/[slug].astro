@@ -1,70 +1,43 @@
 ---
-// AI:PAGE:BLOG_DETAIL — Blog detail template for transformerWorker injection
-// transformerWorker Step 4 writes src/data/blog-data.ts; this page renders it.
+// AI:PAGE:BLOG_DETAIL — transformerWorker writes src/data/blog-data.ts.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/blocks/Navbar.astro';
+import Footer from '../../components/blocks/Footer.astro';
+import ImageOrFallback from '../../components/blocks/ImageOrFallback.astro';
 import { blogData } from '../../data/blog-data';
 
-// For static export, we need getStaticPaths.
-// SANITY: Replace this with actual Sanity content fetch
 export function getStaticPaths() {
   return blogData.posts.map((post) => ({
     params: { slug: post.slug },
-    props: {
-      title: post.title,
-      date: post.date,
-      category: post.category,
-      content: post.content || '',
-      author: post.author || 'Author Name',
-      authorRole: post.authorRole || 'Team Member',
-    },
+    props: { post },
   }));
 }
 
 const { slug } = Astro.params;
-const { title, date, category, content, author, authorRole } = Astro.props as {
-  title: string; date: string; category: string; content: string;
-  author: string; authorRole: string;
-};
+const { post } = Astro.props as { post: (typeof blogData.posts)[number] };
+const { title, date, category, content = [], author = 'Author Name', authorRole = 'Team Member', image } = post;
 
-// Related posts (placeholder — connect to Sanity)
 const relatedPosts = blogData.posts
   .filter((p) => p.slug !== slug)
   .slice(0, 3)
   .map((p) => ({ slug: p.slug, title: p.title, date: p.date }));
 ---
 
-<BaseLayout
-  title={title}
-  description="Read this article on our blog."
->
-  <!-- Navbar -->
-  <nav slot="navbar" class="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-sm border-b border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="/" class="font-bold text-xl text-primary" aria-label="Home">Logo</a>
-      <a href="/blog" class="text-muted-foreground hover:text-primary transition-colors text-sm" aria-label="Back to Blog">
-        ← Back to Blog
-      </a>
-    </div>
-  </nav>
+<BaseLayout title={title} description={post.excerpt}>
+  <Navbar slot="navbar" props={{ logo: 'Logo', links: [{ label: '← Back to Blog', href: '/blog' }] }} />
 
   <div class="h-16"></div>
 
   <article class="py-16 px-4">
     <div class="max-w-3xl mx-auto">
-      <!-- Article header -->
       <header class="mb-12">
         <div class="flex items-center gap-3 mb-6">
-          <span class="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-            {category}
-          </span>
+          <span class="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">{category}</span>
           <time class="text-sm text-muted-foreground tabular-nums" datetime={date}>
             {new Date(date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </time>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-foreground text-balance leading-tight">
-          {title}
-        </h1>
-        <!-- AI:INJECT:AUTHOR_META -->
+        <h1 class="text-4xl md:text-5xl font-bold text-foreground text-balance leading-tight">{title}</h1>
         <div class="mt-6 flex items-center gap-4">
           <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0" aria-hidden="true">
             <span class="text-primary text-sm font-bold">{author.charAt(0)}</span>
@@ -76,68 +49,49 @@ const relatedPosts = blogData.posts
         </div>
       </header>
 
-      <!-- Hero image -->
-      <div class="aspect-[16/9] bg-primary/5 rounded-2xl overflow-hidden mb-12 flex items-center justify-center">
-        <!-- SANITY: Replace with actual featured image -->
-        <span class="text-muted-foreground" aria-hidden="true">Featured Image</span>
+      <div class="aspect-[16/9] rounded-2xl overflow-hidden mb-12">
+        <ImageOrFallback image={image ? { ...image, alt: image.alt || title } : { alt: title }} loading="eager" />
       </div>
 
-      <!-- Article content -->
-      <!-- SANITY: Replace with Portable Text renderer -->
-      <div class="prose prose-lg max-w-none">
-        <!-- AI:INJECT:ARTICLE_CONTENT -->
-        {content ? <div set:html={content} /> : (
-          <p class="text-muted-foreground text-xl leading-relaxed">
-            This is a template article showing how your blog posts will look on the new website.
-            The actual content will be migrated via Sanity CMS.
-          </p>
+      <div class="prose prose-lg max-w-none flex flex-col gap-4">
+        {content.length > 0 ? (
+          content.map((p) => <p class="text-muted-foreground text-lg leading-relaxed text-pretty">{p}</p>)
+        ) : (
+          <p class="text-muted-foreground text-xl leading-relaxed">{post.excerpt}</p>
         )}
       </div>
 
-      <!-- Social share -->
       <div class="mt-12 pt-8 border-t border-border flex items-center justify-between">
         <p class="text-sm font-medium text-foreground">Share this article</p>
         <div class="flex gap-3">
           <a
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.toString())}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             class="px-4 py-2 text-sm rounded-lg border border-border hover:bg-card transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Share on Twitter"
-          >
-            Twitter
-          </a>
+          >Twitter</a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(Astro.url.toString())}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             class="px-4 py-2 text-sm rounded-lg border border-border hover:bg-card transition-colors focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Share on LinkedIn"
-          >
-            LinkedIn
-          </a>
+          >LinkedIn</a>
         </div>
       </div>
     </div>
   </article>
 
-  <!-- Related posts -->
   <section class="py-16 px-4 bg-card" aria-labelledby="related-heading">
     <div class="max-w-7xl mx-auto">
       <h2 id="related-heading" class="text-2xl font-bold text-foreground mb-8">Related Articles</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {relatedPosts.map((post) => (
+        {relatedPosts.map((p) => (
           <article class="bg-background rounded-xl p-6 border border-border hover:border-primary/30 transition-colors">
-            <time class="text-xs text-muted-foreground tabular-nums" datetime={post.date}>
-              {new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            <time class="text-xs text-muted-foreground tabular-nums" datetime={p.date}>
+              {new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </time>
             <h3 class="mt-2 text-lg font-semibold text-foreground text-balance">
-              <a
-                href={`/blog/${post.slug}`}
-                class="hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded"
-              >
-                {post.title}
-              </a>
+              <a href={`/blog/${p.slug}`} class="hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded">{p.title}</a>
             </h3>
           </article>
         ))}
@@ -145,11 +99,5 @@ const relatedPosts = blogData.posts
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer slot="footer" class="py-12 px-4 border-t border-border">
-    <div class="max-w-7xl mx-auto text-center text-muted-foreground text-sm">
-      <!-- AI:INJECT:FOOTER_CONTENT -->
-      © {new Date().getFullYear()} Company Name
-    </div>
-  </footer>
+  <Footer slot="footer" props={{ copyright: `© ${new Date().getFullYear()}`, links: [] }} />
 </BaseLayout>
